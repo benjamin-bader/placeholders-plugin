@@ -1,4 +1,13 @@
 dependencies {
-    compile gradleApi()
+    api gradleApi()
     compileOnly 'com.android.tools.build:gradle:3.0.0-alpha3'
+}
+
+jar {
+    manifest {
+        attributes(
+                'Implementation-Title': 'placeholders-plugin',
+                'Implementation-Version': VERSION
+        )
+    }
 }

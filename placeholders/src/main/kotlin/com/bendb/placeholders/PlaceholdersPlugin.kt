@@ -2,6 +2,7 @@ package com.bendb.placeholders
 
 import com.android.build.gradle.AppExtension
 import com.android.build.gradle.AppPlugin
+import com.android.build.gradle.tasks.ProcessAndroidResources
 import com.android.ide.common.res2.FileStatus
 import com.android.utils.FileUtils
 import org.gradle.api.DefaultTask
@@ -21,7 +22,6 @@ class PlaceholdersPlugin: Plugin<Project> {
             val ext = project.extensions.findByType(AppExtension::class.java)!!
             ext.applicationVariants.all { variant ->
                 val mergedResourcesDir = variant.mergeResources.outputDir
-                val mergedResources = project.files(mergedResourcesDir)
 
                 variant.outputs.all { output ->
                     val intermediatePath = Paths.get(
@@ -30,19 +30,28 @@ class PlaceholdersPlugin: Plugin<Project> {
                             output.name,
                             "res-placeholders").toFile()
 
+                    // TODO: Use TaskContainer here.
                     val task = ReplacePlaceholdersTask(
                             emptyMap(),
                             mergedResourcesDir,
                             intermediatePath)
 
+                    task.dependsOn(variant.mergeResources)
+
                     output.processResources.let {
-                        it.inputResourcesDir.minus(mergedResources)
-                        it.inputResourcesDir.add(task.outputFiles)
+                        replaceInputResourcesDir(it, task.outputFiles)
+                        it.dependsOn(task)
                     }
                 }
             }
         }
     }
+}
+
+fun replaceInputResourcesDir(target: ProcessAndroidResources, replacement: FileCollection) {
+    val field = ProcessAndroidResources::class.java.getField("inputResourcesDir")
+    field.isAccessible = true
+    field.set(target, replacement)
 }
 
 @ParallelizableTask

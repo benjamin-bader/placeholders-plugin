@@ -17,14 +17,21 @@ allprojects {
         jcenter()
     }
 
-    group 'com.bendb.placeholders'
-    version '0.1.0-SNAPSHOT'
+    group GROUP
+    version VERSION
 }
 
 subprojects {
+    apply plugin: 'java-library'
     apply plugin: 'kotlin'
 
     dependencies {
-        compile "org.jetbrains.kotlin:kotlin-stdlib-jre8:$kotlin_version"
+        api "org.jetbrains.kotlin:kotlin-stdlib-jre8:$kotlin_version"
+    }
+}
+
+afterEvaluate {
+    subprojects {
+        apply from: file("${rootDir}/gradle/gradle-mvn-push.gradle")
     }
 }
