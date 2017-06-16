@@ -1,3 +1,18 @@
+/*
+ * Copyright 2017 Benjamin Bader
+ *
+ * Licensed under the Apache License, Version 2.0 (the "License");
+ * you may not use this file except in compliance with the License.
+ * You may obtain a copy of the License at
+ *
+ *     http://www.apache.org/licenses/LICENSE-2.0
+ *
+ * Unless required by applicable law or agreed to in writing, software
+ * distributed under the License is distributed on an "AS IS" BASIS,
+ * WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+ * See the License for the specific language governing permissions and
+ * limitations under the License.
+ */
 package com.bendb.placeholders;
 
 import com.android.ide.common.res2.FileStatus;
@@ -6,13 +21,7 @@ import com.android.utils.FileUtils;
 import org.gradle.api.DefaultTask;
 import org.gradle.api.file.ConfigurableFileCollection;
 import org.gradle.api.file.FileCollection;
-import org.gradle.api.tasks.CacheableTask;
-import org.gradle.api.tasks.Input;
-import org.gradle.api.tasks.InputDirectory;
-import org.gradle.api.tasks.OutputDirectory;
-import org.gradle.api.tasks.OutputFiles;
-import org.gradle.api.tasks.ParallelizableTask;
-import org.gradle.api.tasks.TaskAction;
+import org.gradle.api.tasks.*;
 import org.gradle.api.tasks.incremental.IncrementalTaskInputs;
 
 import java.io.BufferedReader;
@@ -52,7 +61,7 @@ public class PlaceholderReplacementTask extends DefaultTask {
         return preProcessedResourceDirectory;
     }
 
-    @OutputFiles
+    @OutputDirectories
     public FileCollection getProcessedResourceFiles() {
         return processedResourceFiles;
     }
@@ -86,7 +95,7 @@ public class PlaceholderReplacementTask extends DefaultTask {
 
         int index = 0;
         for (Map.Entry<String, String> entry : placeholders.entrySet()) {
-            placeholderArray[index] = entry.getKey();
+            placeholderArray[index] = getPlaceholderSyntaxFor(entry.getKey());
             replacementArray[index] = entry.getValue();
         }
 
@@ -152,12 +161,16 @@ public class PlaceholderReplacementTask extends DefaultTask {
 
         Files.createDirectories(toWrite.getParent());
 
-        if (inputFilePath.endsWith(".xml")) {
+        if (Files.isDirectory(inputFilePath)) {
+            Files.createDirectories(toWrite);
+        } else if (inputFilePath.endsWith(".xml")) {
             getLogger().debug("{} is probably an XML resource; replacing placeholders.", inputFilePath);
+            Files.deleteIfExists(toWrite);
             processXmlResourceFile(inputFilePath, toWrite);
         } else {
             getLogger().debug("{} is probably not an XML resource; copying it verbatim.", inputFilePath);
-            Files.copy(inputFilePath, toWrite, StandardCopyOption.ATOMIC_MOVE);
+            Files.deleteIfExists(toWrite);
+            Files.copy(inputFilePath, toWrite, StandardCopyOption.COPY_ATTRIBUTES);
         }
     }
 
@@ -184,5 +197,14 @@ public class PlaceholderReplacementTask extends DefaultTask {
             line = line.replace(placeholderArray[i], replacementArray[i]);
         }
         return line;
+    }
+
+    private static String getPlaceholderSyntaxFor(String placeholder) {
+        if (placeholder.startsWith("${") && placeholder.endsWith("}")) {
+            return placeholder;
+        } else if (placeholder.startsWith("${") || placeholder.endsWith("}")) {
+            throw new IllegalArgumentException("Invalid placeholder syntax: " + placeholder);
+        }
+        return "${" + placeholder + "}";
     }
 }
