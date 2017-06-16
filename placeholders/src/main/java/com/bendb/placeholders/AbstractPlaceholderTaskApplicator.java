@@ -24,11 +24,9 @@ import java.util.Locale;
 
 abstract class AbstractPlaceholderTaskApplicator implements PlaceholderTaskApplicator {
     protected final Project project;
-    protected final PlaceholdersExtension ext;
 
     protected AbstractPlaceholderTaskApplicator(Project project) {
         this.project = project;
-        this.ext = project.getExtensions().create("placeholders", PlaceholdersExtension.class);
     }
 
     @Override
