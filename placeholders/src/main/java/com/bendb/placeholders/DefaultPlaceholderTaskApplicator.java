@@ -25,6 +25,7 @@ import org.gradle.api.Project;
 
 import java.io.File;
 import java.lang.reflect.Field;
+import java.util.LinkedHashMap;
 import java.util.Locale;
 import java.util.Map;
 
@@ -44,12 +45,16 @@ class DefaultPlaceholderTaskApplicator extends AbstractPlaceholderTaskApplicator
         MergeResources mergeResources = variant.getMergeResources();
         File mergedResourcesDir = mergeResources.getOutputDir();
 
-        Map<String, String> configuredPlaceholders = ext.getPlaceholders();
-        String applicationId = variant.getApplicationId();
-        String oldValue = configuredPlaceholders.put("applicationId", applicationId);
-        if (oldValue != null) {
-            configuredPlaceholders.put("applicationId", oldValue);
+        if (!"AAPT_V1".equals(mergeResources.getAaptGeneration())) {
+            project.getLogger().warn(
+                    "placeholders works with aapt1 only; current aapt version is {}",
+                    mergeResources.getAaptGeneration());
+            return;
         }
+
+        Map<String, Object> placeholders = new LinkedHashMap<>(
+                variant.getMergedFlavor().getManifestPlaceholders());
+        placeholders.put("applicationId", variant.getApplicationId());
 
         outputs.all(output -> {
             String taskNameSlug = capitalize(variant.getName());
@@ -67,7 +72,7 @@ class DefaultPlaceholderTaskApplicator extends AbstractPlaceholderTaskApplicator
 
             placeholderTask.dependsOn(mergeResources);
             placeholderTask.setPreProcessedResourceDirectory(mergedResourcesDir);
-            placeholderTask.setPlaceholders(configuredPlaceholders);
+            placeholderTask.setPlaceholders(placeholders);
             placeholderTask.setOutputDirectory(processedResourcesOutputDir);
 
             ProcessAndroidResources processResources = output.getProcessResources();

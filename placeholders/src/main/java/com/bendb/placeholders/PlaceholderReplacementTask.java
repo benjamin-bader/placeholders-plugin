@@ -34,6 +34,7 @@ import java.nio.file.StandardCopyOption;
 import java.nio.file.StandardOpenOption;
 import java.util.LinkedHashMap;
 import java.util.List;
+import java.util.Locale;
 import java.util.Map;
 import java.util.stream.Collectors;
 
@@ -42,7 +43,7 @@ import java.util.stream.Collectors;
 public class PlaceholderReplacementTask extends DefaultTask {
     private File preProcessedResourceDirectory;
     private File outputDirectory;
-    private Map<String, String> placeholders;
+    private Map<String, Object> placeholders;
     private ConfigurableFileCollection processedResourceFiles = getProject().files().builtBy(this);
 
     // temporary state
@@ -77,11 +78,11 @@ public class PlaceholderReplacementTask extends DefaultTask {
     }
 
     @Input
-    public Map<String, String> getPlaceholders() {
+    public Map<String, Object> getPlaceholders() {
         return placeholders;
     }
 
-    public void setPlaceholders(Map<String, String> placeholders) {
+    public void setPlaceholders(Map<String, Object> placeholders) {
         this.placeholders = placeholders;
     }
 
@@ -94,9 +95,9 @@ public class PlaceholderReplacementTask extends DefaultTask {
         replacementArray = new String[placeholders.size()];
 
         int index = 0;
-        for (Map.Entry<String, String> entry : placeholders.entrySet()) {
+        for (Map.Entry<String, Object> entry : placeholders.entrySet()) {
             placeholderArray[index] = getPlaceholderSyntaxFor(entry.getKey());
-            replacementArray[index] = entry.getValue();
+            replacementArray[index] = String.valueOf(entry.getValue());
         }
 
         if (inputs.isIncremental()) {
@@ -161,9 +162,11 @@ public class PlaceholderReplacementTask extends DefaultTask {
 
         Files.createDirectories(toWrite.getParent());
 
+        String inputFilePathString = inputFilePath.toString().toLowerCase(Locale.US);
+
         if (Files.isDirectory(inputFilePath)) {
             Files.createDirectories(toWrite);
-        } else if (inputFilePath.endsWith(".xml")) {
+        } else if (inputFilePathString.endsWith(".xml")) {
             getLogger().debug("{} is probably an XML resource; replacing placeholders.", inputFilePath);
             Files.deleteIfExists(toWrite);
             processXmlResourceFile(inputFilePath, toWrite);

@@ -14,6 +14,6 @@ For example, in `res/xml/syncadapter.xml`:
     />
 ```
 
-WARNING: Experimental and totally non-functional!
+This plugin Works On My Machine, but only for aapt version 1.  Version 2 is the default aapt for build tools 3, incidentally.
 
 Copyright (C) 2017 Benjamin Bader

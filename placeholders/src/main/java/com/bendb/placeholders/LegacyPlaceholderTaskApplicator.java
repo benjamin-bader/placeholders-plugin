@@ -26,6 +26,7 @@ import java.io.File;
 import java.lang.reflect.InvocationTargetException;
 import java.lang.reflect.Method;
 import java.util.Collection;
+import java.util.LinkedHashMap;
 import java.util.Locale;
 import java.util.Map;
 
@@ -51,12 +52,7 @@ class LegacyPlaceholderTaskApplicator extends AbstractPlaceholderTaskApplicator 
         MergeResources mergeResources = variant.getMergeResources();
         File mergedResourcesDir = mergeResources.getOutputDir();
 
-        Map<String, String> configuredPlaceholders = ext.getPlaceholders();
-        String applicationId = variant.getApplicationId();
-        String oldValue = configuredPlaceholders.put("applicationId", applicationId);
-        if (oldValue != null) {
-            configuredPlaceholders.put("applicationId", oldValue);
-        }
+        File intermediateOutputDir = new File(project.getBuildDir(), "outputs/intermediates/res/post-processed");
 
         Collection<BaseVariantOutput> outputs;
         try {
@@ -65,13 +61,17 @@ class LegacyPlaceholderTaskApplicator extends AbstractPlaceholderTaskApplicator 
             throw new AssertionError("Failed to invoke BaseVariantOutput#getOutputs()", e);
         }
 
+        Map<String, Object> placeholders = new LinkedHashMap<>(
+                variant.getMergedFlavor().getManifestPlaceholders());
+        placeholders.put("applicationId", variant.getApplicationId());
+
         for (BaseVariantOutput output : outputs) {
             String taskNameSlug = capitalize(variant.getName());
             if (outputs.size() > 1) {
                 taskNameSlug += capitalize(output.getName());
             }
 
-            File outputBuildDir = new File(project.getBuildDir(), output.getDirName());
+            File outputBuildDir = new File(intermediateOutputDir, output.getDirName());
             File processedResourcesOutputDir = new File(outputBuildDir, "res-placeholders");
 
             String taskName = String.format(Locale.US, "process%sResourcePlaceholders", taskNameSlug);
@@ -81,7 +81,7 @@ class LegacyPlaceholderTaskApplicator extends AbstractPlaceholderTaskApplicator 
 
             placeholderTask.dependsOn(mergeResources);
             placeholderTask.setPreProcessedResourceDirectory(mergedResourcesDir);
-            placeholderTask.setPlaceholders(configuredPlaceholders);
+            placeholderTask.setPlaceholders(placeholders);
             placeholderTask.setOutputDirectory(processedResourcesOutputDir);
 
             ProcessAndroidResources processResources = output.getProcessResources();
