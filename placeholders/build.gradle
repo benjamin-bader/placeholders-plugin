@@ -1,6 +1,8 @@
+description ''
+
 dependencies {
     api gradleApi()
-    compileOnly 'com.android.tools.build:gradle:3.0.0-alpha3'
+    compileOnly 'com.android.tools.build:gradle:3.0.0-alpha4'
 }
 
 jar {
