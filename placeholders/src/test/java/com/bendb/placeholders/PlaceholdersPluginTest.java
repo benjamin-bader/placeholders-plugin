@@ -54,7 +54,7 @@ public class PlaceholdersPluginTest {
             fail("Could not find 'plugin-classpath.txt'; run the `testClasses` build task.");
         }
 
-        BufferedReader reader = new BufferedReader(new InputStreamReader(url.openStream()));
+        BufferedReader reader = new BufferedReader(new InputStreamReader(url.openStream(), "UTF-8"));
         pluginClasspath = new ArrayList<>();
 
         String line;
@@ -85,7 +85,7 @@ public class PlaceholdersPluginTest {
                 "android {\n" +
                 "}";
 
-        Files.write(buildFile.toPath(), gradle.getBytes());
+        Files.write(buildFile.toPath(), gradle.getBytes("UTF-8"));
 
         BuildResult result = GradleRunner.create()
                 .withProjectDir(tempFolder.getRoot())
