@@ -32,17 +32,18 @@ buildscript {
 
     dependencies {
         classpath 'net.ltgt.gradle:gradle-errorprone-plugin:0.0.10'
+        classpath 'com.google.protobuf:protobuf-gradle-plugin:0.8.1'
     }
 }
 
 subprojects {
     apply plugin: 'java-library'
     apply plugin: 'idea'
-    apply plugin: 'net.ltgt.errorprone'
+    //apply plugin: 'net.ltgt.errorprone'
 
-    configurations.errorprone {
-        resolutionStrategy.force 'com.google.errorprone:error_prone_core:2.0.18'
-    }
+//    configurations.errorprone {
+//        resolutionStrategy.force 'com.google.errorprone:error_prone_core:2.0.18'
+//    }
 
     tasks.withType(JavaCompile) {
         options.fork = true

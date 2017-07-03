@@ -13,6 +13,8 @@
  * See the License for the specific language governing permissions and
  * limitations under the License.
  */
+apply plugin: 'com.google.protobuf'
+
 description 'Enable manifest-placeholder processing in Android XML resources'
 
 task createClasspathManifest {
@@ -30,6 +32,8 @@ task createClasspathManifest {
 dependencies {
     api gradleApi()
     compileOnly 'com.android.tools.build:gradle:3.0.0-alpha4'
+    api 'com.google.protobuf:protobuf-java:3.0.0'
+    implementation 'com.squareup.okio:okio:1.13.0'
 
     testImplementation 'junit:junit:4.12'
     testImplementation gradleTestKit()
@@ -42,5 +46,11 @@ jar {
                 'Implementation-Title': 'placeholders-plugin',
                 'Implementation-Version': VERSION
         )
+    }
+}
+
+protobuf {
+    protoc {
+        artifact = 'com.google.protobuf:protoc:3.0.0'
     }
 }

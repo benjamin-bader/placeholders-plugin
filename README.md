@@ -48,4 +48,20 @@ If you want to use this plugin with the new build tools, you can disable aapt2 i
 android.enableAapt2=false
 ```
 
+
+AAPT2 Notes:
+------------
+
+.arsc.flat files:
+- can be one of
+    - CompiledFile (not sure what that means yet)
+    - ResourceTable proto
+    - "ZipFileCollection", containing an entry "resources.arsc.flat" which is a ResourceTable proto
+
+ResourceTable-the-proto contains three binary blobs that are StringPool structures, and a list of "packages"
+containing references to the string pools.  Pools are, as far as I can tell,
+
+- are (sometimes?) ResourceTable protos, containing three binary StringPool structs and a list of packages, referring to data in those pools
+- can possibly be "ZipFileCollection", but I don't know what that means yet.
+
 Copyright (C) 2017 Benjamin Bader

@@ -20,22 +20,28 @@ import com.android.build.gradle.api.BaseVariantOutput;
 import com.android.build.gradle.tasks.MergeResources;
 import com.android.build.gradle.tasks.ProcessAndroidResources;
 
+import com.android.ide.common.res2.MergingException;
+import com.android.ide.common.res2.ResourceSet;
 import org.gradle.api.DomainObjectCollection;
 import org.gradle.api.Project;
 
 import java.io.File;
 import java.lang.reflect.Field;
-import java.util.LinkedHashMap;
-import java.util.Locale;
-import java.util.Map;
+import java.util.*;
+import java.util.function.Supplier;
 
 class DefaultPlaceholderTaskApplicator extends AbstractPlaceholderTaskApplicator {
     private final Field field_inputResourcesDir;
+
+    private final Field field_sourceFolderInputs;
 
     DefaultPlaceholderTaskApplicator(Project project) throws Exception {
         super(project);
         field_inputResourcesDir = ProcessAndroidResources.class.getDeclaredField("inputResourcesDir");
         field_inputResourcesDir.setAccessible(true);
+
+        field_sourceFolderInputs = MergeResources.class.getDeclaredField("sourceFolderInputs");
+        field_sourceFolderInputs.setAccessible(true);
     }
 
     @Override
@@ -44,6 +50,24 @@ class DefaultPlaceholderTaskApplicator extends AbstractPlaceholderTaskApplicator
         DomainObjectCollection<BaseVariantOutput> outputs = (DomainObjectCollection<BaseVariantOutput>) (Object) variant.getOutputs();
         MergeResources mergeResources = variant.getMergeResources();
         File mergedResourcesDir = mergeResources.getOutputDir();
+
+        Supplier<List<ResourceSet>> sourceFolderInputs;
+        try {
+            sourceFolderInputs = (Supplier<List<ResourceSet>>) field_sourceFolderInputs.get(mergeResources);
+        } catch (IllegalAccessException e) {
+            throw new AssertionError(e);
+        }
+
+        for (ResourceSet resourceSet : sourceFolderInputs.get()) {
+            try {
+                resourceSet.loadFromFiles(null);
+            } catch (MergingException e) {
+                throw new AssertionError(e);
+            }
+        }
+
+        Set<File> inputs = mergeResources.getSourceFolderInputs();
+        project.getLogger().lifecycle("Folders: {}", inputs);
 
         if (!"AAPT_V1".equals(mergeResources.getAaptGeneration())) {
             project.getLogger().warn(
