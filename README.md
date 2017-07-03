@@ -1,4 +1,4 @@
-Adds placeholder-variable support to your res/xml files.  Save you keystrokes and reduce hard-to-debug runtime problems caused by package-name typos!
+Adds placeholder-variable support to your res/xml files.  Saves you keystrokes and reduces hard-to-debug runtime problems caused by package-name typos!
 
 For example, in `res/xml/syncadapter.xml`:
 ```xml
@@ -27,8 +27,8 @@ buildscript {
 
 // in your app's build.gradle
 
-apply 'com.android.application' // MUST COME FIRST
-apply 'com.bendb.placeholders'
+apply plugin: 'com.android.application' // MUST COME FIRST
+apply plugin: 'com.bendb.placeholders'
 
 // Any AndroidManifest.xml placeholder will now be applied to your XML resources...
 android {
