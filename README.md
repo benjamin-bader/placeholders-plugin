@@ -14,6 +14,38 @@ For example, in `res/xml/syncadapter.xml`:
     />
 ```
 
+To use:
+
+```gradle
+// in root build.gradle
+
+buildscript {
+  dependencies {
+    classpath 'com.bendb.placeholders:placeholders:0.1.0'
+  }
+}
+
+// in your app's build.gradle
+
+apply 'com.android.application' // MUST COME FIRST
+apply 'com.bendb.placeholders'
+
+// Any AndroidManifest.xml placeholder will now be applied to your XML resources...
+android {
+  defaultConfig {
+    // ...even those that you customize
+    manifestPlaceholders = [
+      someValue: "MyGreatValue"
+    ]
+  }
+}
+```
+
 This plugin Works On My Machine, but only for aapt version 1.  Version 2 is the default aapt for build tools 3, incidentally.
+
+If you want to use this plugin with the new build tools, you can disable aapt2 in `gradle.properties` by adding the following line:
+```
+android.enableAapt2=false
+```
 
 Copyright (C) 2017 Benjamin Bader
