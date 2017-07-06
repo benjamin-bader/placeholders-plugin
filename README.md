@@ -58,6 +58,13 @@ AAPT2 Notes:
     - ResourceTable proto
     - "ZipFileCollection", containing an entry "resources.arsc.flat" which is a ResourceTable proto
 
+.xml.flat flies:
+- TOTALLY DIFFERENT
+    - todo
+
+.png.flat, .9.png.flat:
+- I think it's safe to say we can ignore these.
+
 ResourceTable-the-proto contains three binary blobs that are StringPool structures, and a list of "packages"
 containing references to the string pools.  Pools are, as far as I can tell,
 

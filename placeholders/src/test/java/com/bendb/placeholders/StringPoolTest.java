@@ -1,7 +1,8 @@
 package com.bendb.placeholders;
 
-import com.bendb.placeholders.aapt2.StringPool;
+import com.bendb.placeholders.aapt2.StringPoolParser;
 import com.google.protobuf.ByteString;
+import com.google.protobuf.CodedInputStream;
 import okio.Buffer;
 import org.gradle.internal.impldep.com.google.common.io.ByteStreams;
 import org.junit.Test;
@@ -17,11 +18,16 @@ public class StringPoolTest {
 
         ByteString stringPoolBytes = rt.getStringPool().getData();
 
-        Buffer buffer = new Buffer();
-        buffer.write(stringPoolBytes.toByteArray());
+        StringPoolParser.parse(stringPoolBytes);
+    }
 
-        StringPool.ResStringPoolHeader header =  StringPool.ResStringPoolHeader.parse(buffer);
-        System.out.println("rt = " + rt);
-        System.out.println("rt.getPackagesList() = " + rt.getPackagesList());
+    @Test
+    public void bar() throws Exception {
+        InputStream asrc = getClass().getClassLoader().getResourceAsStream("menu_menu_main.xml.flat");
+        CodedInputStream cis = CodedInputStream.newInstance(asrc);
+        //byte[] bytes = ByteStreams.toByteArray(asrc);
+        aapt.pb.Format.CompiledFile cf = aapt.pb.Format.CompiledFile.parseFrom(cis);
+
+        cf.toString();
     }
 }
