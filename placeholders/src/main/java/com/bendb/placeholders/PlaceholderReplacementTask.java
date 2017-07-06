@@ -98,6 +98,7 @@ public class PlaceholderReplacementTask extends DefaultTask {
         for (Map.Entry<String, Object> entry : placeholders.entrySet()) {
             placeholderArray[index] = getPlaceholderSyntaxFor(entry.getKey());
             replacementArray[index] = String.valueOf(entry.getValue());
+            index++;
         }
 
         if (inputs.isIncremental()) {
