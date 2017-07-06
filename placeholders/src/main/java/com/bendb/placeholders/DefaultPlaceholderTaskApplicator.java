@@ -56,14 +56,15 @@ class DefaultPlaceholderTaskApplicator extends AbstractPlaceholderTaskApplicator
                 variant.getMergedFlavor().getManifestPlaceholders());
         placeholders.put("applicationId", variant.getApplicationId());
 
+        File intermediateDir = new File(getIntermediateDir(), variant.getDirName());
+
         outputs.all(output -> {
+            File outputDir = intermediateDir;
             String taskNameSlug = capitalize(variant.getName());
             if (outputs.size() > 1) {
+                outputDir = new File(getIntermediateDir(), output.getDirName());
                 taskNameSlug += capitalize(output.getName());
             }
-
-            File outputBuildDir = new File(project.getBuildDir(), output.getDirName());
-            File processedResourcesOutputDir = new File(outputBuildDir, "res-placeholders");
 
             String taskName = String.format(Locale.US, "process%sResourcePlaceholders", taskNameSlug);
             PlaceholderReplacementTask placeholderTask = project
@@ -73,7 +74,7 @@ class DefaultPlaceholderTaskApplicator extends AbstractPlaceholderTaskApplicator
             placeholderTask.dependsOn(mergeResources);
             placeholderTask.setPreProcessedResourceDirectory(mergedResourcesDir);
             placeholderTask.setPlaceholders(placeholders);
-            placeholderTask.setOutputDirectory(processedResourcesOutputDir);
+            placeholderTask.setOutputDirectory(outputDir);
 
             ProcessAndroidResources processResources = output.getProcessResources();
             processResources.dependsOn(placeholderTask);

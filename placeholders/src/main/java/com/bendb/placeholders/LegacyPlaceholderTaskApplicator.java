@@ -52,8 +52,6 @@ class LegacyPlaceholderTaskApplicator extends AbstractPlaceholderTaskApplicator 
         MergeResources mergeResources = variant.getMergeResources();
         File mergedResourcesDir = mergeResources.getOutputDir();
 
-        File intermediateOutputDir = new File(project.getBuildDir(), "outputs/intermediates/res/post-processed");
-
         Collection<BaseVariantOutput> outputs;
         try {
             outputs = (Collection<BaseVariantOutput>) method_getOutputs.invoke(variant);
@@ -65,14 +63,15 @@ class LegacyPlaceholderTaskApplicator extends AbstractPlaceholderTaskApplicator 
                 variant.getMergedFlavor().getManifestPlaceholders());
         placeholders.put("applicationId", variant.getApplicationId());
 
+        File intermediateOutputDir = new File(getIntermediateDir(), variant.getDirName());
+
         for (BaseVariantOutput output : outputs) {
+            File outputDir = intermediateOutputDir;
             String taskNameSlug = capitalize(variant.getName());
             if (outputs.size() > 1) {
+                outputDir = new File(getIntermediateDir(), output.getDirName());
                 taskNameSlug += capitalize(output.getName());
             }
-
-            File outputBuildDir = new File(intermediateOutputDir, output.getDirName());
-            File processedResourcesOutputDir = new File(outputBuildDir, "res-placeholders");
 
             String taskName = String.format(Locale.US, "process%sResourcePlaceholders", taskNameSlug);
             PlaceholderReplacementTask placeholderTask = project
@@ -82,7 +81,7 @@ class LegacyPlaceholderTaskApplicator extends AbstractPlaceholderTaskApplicator 
             placeholderTask.dependsOn(mergeResources);
             placeholderTask.setPreProcessedResourceDirectory(mergedResourcesDir);
             placeholderTask.setPlaceholders(placeholders);
-            placeholderTask.setOutputDirectory(processedResourcesOutputDir);
+            placeholderTask.setOutputDirectory(outputDir);
 
             ProcessAndroidResources processResources = output.getProcessResources();
             processResources.dependsOn(placeholderTask);

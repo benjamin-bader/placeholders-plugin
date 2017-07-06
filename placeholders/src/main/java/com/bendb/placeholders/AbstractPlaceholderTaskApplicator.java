@@ -20,6 +20,7 @@ import com.android.build.gradle.api.ApplicationVariant;
 
 import org.gradle.api.Project;
 
+import java.io.File;
 import java.util.Locale;
 
 abstract class AbstractPlaceholderTaskApplicator implements PlaceholderTaskApplicator {
@@ -47,5 +48,9 @@ abstract class AbstractPlaceholderTaskApplicator implements PlaceholderTaskAppli
         }
 
         return string.substring(0, 1).toUpperCase(Locale.US) + string.substring(1);
+    }
+
+    protected File getIntermediateDir() {
+        return new File(project.getBuildDir(), "intermediates/res/post-processed");
     }
 }
