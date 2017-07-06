@@ -21,7 +21,7 @@ To use:
 
 buildscript {
   dependencies {
-    classpath 'com.bendb.placeholders:placeholders:0.1.0'
+    classpath 'com.bendb.placeholders:placeholders:0.1.1'
   }
 }
 
